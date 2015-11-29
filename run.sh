@@ -22,6 +22,10 @@ rm -f nginx.error.log apache.error.log apache2.pid
 touch mime.types
 # See comment in nginx.conf for why we do this.
 cat cert.pem test-ca.pem > cert-fullchain.pem
+
+openssl ocsp -no_nonce -issuer test-ca.pem -cert cert.pem -reqout ocsp.req
+curl --data-binary @ocsp.req -o ocsp.resp http://localhost:4002/
+
 trap 'kill $(jobs -p)' EXIT
 apache2 -d . -k start -X &
 nginx -c nginx.conf -p . &
